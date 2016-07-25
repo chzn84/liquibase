@@ -10,6 +10,7 @@ import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
@@ -104,6 +105,9 @@ public class DiffToReport {
             printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type, comparator), out);
             printSetComparison("Unexpected " + getTypeName(type), diffResult.getUnexpectedObjects(type, comparator), out);
 
+            if (type.equals(StoredProcedure.class)) {
+                printSetComparison("Changed " + getTypeName(type) + " - summary", diffResult.getChangedObjectsSummary(type, comparator), out);
+            }
             printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type, comparator), out);
 
         }

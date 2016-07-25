@@ -59,6 +59,45 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return databaseMetaData;
         }
 
+        public List<CachedRow> getProcedures(final String catalogName, final String schemaName, final String procedureName) throws DatabaseException {
+            return getResultSetCache("getProcedures").get(new ResultSetCache.UnionResultSetExtractor(database) {
+
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, row.getString("PROCEDURE_NAME"));
+                }
+
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, procedureName);
+                }
+
+                @Override
+                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    List<CachedRow> returnList = new ArrayList<CachedRow>();
+
+                    List<String> tables = new ArrayList<String>();
+                    String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+                    if (database instanceof SybaseDatabase) {
+                      returnList.addAll(extract(databaseMetaData.getProcedures(jdbcCatalogName, jdbcSchemaName, procedureName)));
+                      return returnList;
+                    } else
+                      return null;
+                }
+
+                @Override
+                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                  // TODO Auto-generated method stub
+                  return null;
+                }
+
+            });
+        }
+
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName, final String fkName) throws DatabaseException {
             return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
