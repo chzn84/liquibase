@@ -157,6 +157,12 @@ public class DiffResult {
         return map;
     }
 
+    public <T extends DatabaseObject> SortedSet<T> getChangedObjectsSummary(Class<T> type, Comparator<DatabaseObject> comparator) {
+        TreeSet<T> set = new TreeSet<T>(comparator);
+        set.addAll(getChangedObjects(type).keySet());
+        return set;
+    }
+
     public ObjectDifferences getChangedObject(DatabaseObject example, CompareControl.SchemaComparison[] schemaComparisons) {
         Database accordingTo = this.getComparisonSnapshot().getDatabase();
         DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();

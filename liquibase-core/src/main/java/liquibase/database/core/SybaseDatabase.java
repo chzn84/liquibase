@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.statement.core.GetProcedureTextStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
@@ -296,5 +297,23 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return objectName;
         }
         return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+    }
+
+    @Override
+    public boolean supportsPrimaryKeyNames() {
+        return true;
+    }
+//////
+    public String getProcedureText(CatalogAndSchema schema, String procedureName) throws DatabaseException {
+        schema = schema.customize(this);
+        GetProcedureTextStatement statement = new GetProcedureTextStatement(schema.getCatalogName(), schema.getSchemaName(), procedureName);
+        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        @SuppressWarnings("unchecked")
+        List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
+        StringBuilder definition = new StringBuilder();
+        for (String d : definitionRows) {
+            definition.append(d);
+        }
+        return definition.toString();
     }
 }
