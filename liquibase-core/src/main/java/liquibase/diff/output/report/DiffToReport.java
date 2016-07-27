@@ -14,6 +14,7 @@ import liquibase.structure.core.StoredProcedure;
 import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class DiffToReport {
@@ -28,6 +29,7 @@ public class DiffToReport {
 
     public void print() throws DatabaseException {
         final DatabaseObjectComparator comparator = new DatabaseObjectComparator();
+
         out.println("Reference Database: " + diffResult.getReferenceSnapshot().getDatabase());
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 
@@ -105,11 +107,11 @@ public class DiffToReport {
             printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type, comparator), out);
             printSetComparison("Unexpected " + getTypeName(type), diffResult.getUnexpectedObjects(type, comparator), out);
 
-            if (type.equals(StoredProcedure.class)) {
-                printSetComparison("Changed " + getTypeName(type) + " - summary", diffResult.getChangedObjectsSummary(type, comparator), out);
-            }
+            if ( type.equals(StoredProcedure.class) && diffResult.getChangedObjectsSummary(type, comparator).size() > 0) {
+                printSetComparison("Changed " + getTypeName(type), diffResult.getChangedObjectsSummary(type, comparator), out);
+            } else {
             printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type, comparator), out);
-
+            }
         }
 
 //        printColumnComparison(diffResult.getColumns().getChanged(), out);
