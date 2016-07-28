@@ -98,6 +98,8 @@ public class Main {
 
     protected String outputFile;
 
+    public Boolean verbose = Boolean.FALSE;
+
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         try {
             run(args);
@@ -314,7 +316,8 @@ public class Main {
                             && !cmdParm.startsWith("--referenceUrl")
                             && !cmdParm.startsWith("--excludeObjects")
                             && !cmdParm.startsWith("--includeObjects")
-                            && !cmdParm.startsWith("--diffTypes")) {
+                            && !cmdParm.startsWith("--diffTypes")
+                            && !cmdParm.startsWith("--verbose")) {
                         messages.add("unexpected command parameter: " + cmdParm);
                     }
                 }
@@ -1328,4 +1331,7 @@ public class Main {
         return System.getProperty("os.name").startsWith("Windows ");
     }
 
+    public Boolean isVerbose() {
+        return verbose;
+    }
 }

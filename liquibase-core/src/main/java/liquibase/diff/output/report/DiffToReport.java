@@ -14,7 +14,8 @@ import liquibase.structure.core.StoredProcedure;
 import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class DiffToReport {
@@ -109,6 +110,9 @@ public class DiffToReport {
 
             if ( type.equals(StoredProcedure.class) && diffResult.getChangedObjectsSummary(type, comparator).size() > 0) {
                 printSetComparison("Changed " + getTypeName(type), diffResult.getChangedObjectsSummary(type, comparator), out);
+                if (getVerbose()) {
+                    printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type, comparator), out);
+                }
             } else {
             printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type, comparator), out);
             }
@@ -172,6 +176,42 @@ public class DiffToReport {
             schemaName = schemaName + " -> " + convertedSchemaName;
         }
         return schemaName;
+    }
+
+    public Boolean getVerbose() {
+        Boolean value = Boolean.FALSE;
+        Class<?> mainClass = null;
+        try {
+            mainClass = Class.forName("liquibase.integration.commandline.Main");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Object obj = null;
+        try {
+            obj = mainClass.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        Method method = null;
+        try {
+            method = mainClass.getDeclaredMethod("isVerbose");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+        try {
+            value = (Boolean)method.invoke(obj);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return value;
     }
 
 //    private void printColumnComparison(SortedSet<Column> changedColumns,
